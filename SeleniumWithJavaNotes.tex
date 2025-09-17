@@ -1,0 +1,378 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4
+}
+
+\title{Selenium with Java: Comprehensive Notes (Basic to Advanced)}
+\author{Grok}
+\date{September 17, 2025}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction to Selenium}
+
+\subsection{What is Selenium?}
+Selenium is an open-source tool for automating web browsers, ideal for testing web applications like login flows on sites such as Amazon.
+
+\begin{itemize}
+    \item \textbf{Why Selenium?} Free, supports multiple browsers (Chrome, Firefox), and languages (Java is robust for automation).
+    \item \textbf{Components}:
+    \begin{itemize}
+        \item \textbf{WebDriver}: Main tool for scripting (our focus).
+        \item \textbf{IDE}: Browser extension for recording simple tests.
+        \item \textbf{Grid}: Runs tests on multiple machines/browsers.
+        \item \textbf{RC}: Deprecated, avoid.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Why Selenium with Java?}
+Java’s object-oriented nature, exception handling, and libraries like TestNG make it ideal. Example: Automate a Google search.
+
+\section{Setting Up the Environment}
+
+\subsection{Step 1: Install Java JDK}
+\begin{itemize}
+    \item Download JDK 8 or 11 from Oracle or OpenJDK.
+    \item Verify: \texttt{java -version}.
+    \item Set \texttt{JAVA\_HOME} environment variable.
+\end{itemize}
+
+\subsection{Step 2: Install IDE}
+Use Eclipse (Java EE) or IntelliJ IDEA Community. Create a Maven project for easy dependency management.
+
+\subsection{Step 3: Add Selenium}
+\begin{itemize}
+    \item Manual: Download Selenium WebDriver JARs from \url{https://selenium.dev}.
+    \item Maven: Add to \texttt{pom.xml}:
+\end{itemize}
+
+\begin{lstlisting}[language=XML]
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-java</artifactId>
+    <version>4.15.0</version>
+</dependency>
+\end{lstlisting}
+
+For Chrome, download ChromeDriver and add to PATH.
+
+\subsection{Quick Test}
+\begin{lstlisting}[language=Java]
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class FirstTest {
+    public static void main(String[] args) {
+        WebDriver driver = new ChromeDriver();
+        driver.get("https://www.google.com");
+        System.out.println("Title: " + driver.getTitle());
+        driver.quit();
+    }
+}
+\end{lstlisting}
+
+\section{Basic WebDriver Concepts}
+
+\subsection{Launching Browsers}
+\begin{itemize}
+    \item Chrome: As above.
+    \item Firefox:
+    \begin{lstlisting}[language=Java]
+import org.openqa.selenium.firefox.FirefoxDriver;
+WebDriver driver = new FirefoxDriver();
+    \end{lstlisting}
+    \item Headless:
+    \begin{lstlisting}[language=Java]
+import org.openqa.selenium.chrome.ChromeOptions;
+ChromeOptions options = new ChromeOptions();
+options.addArguments("--headless");
+WebDriver driver = new ChromeDriver(options);
+    \end{lstlisting}
+\end{itemize}
+
+\subsection{Navigating}
+\begin{itemize}
+    \item \texttt{driver.get("url")}: Open page.
+    \item \texttt{driver.navigate().to("url")}: Supports back/forward.
+    \item \texttt{driver.getTitle()}: Page title.
+\end{itemize}
+
+Example: Navigate Amazon.
+\begin{lstlisting}[language=Java]
+driver.get("https://www.amazon.com");
+driver.navigate().to("https://www.google.com");
+driver.navigate().back();
+System.out.println(driver.getCurrentUrl());
+driver.quit();
+\end{lstlisting}
+
+\section{Finding Elements (Locators)}
+
+Use \texttt{driver.findElement(By.locator)}. Common locators:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l l l l}
+\toprule
+\textbf{Locator} & \textbf{Description} & \textbf{When to Use} & \textbf{Example} \\
+\midrule
+By.id & Fast, unique ID & First choice & \texttt{By.id("username")} \\
+By.name & Name attribute & Forms & \texttt{By.name("user")} \\
+By.className & Class attribute & Styling & \texttt{By.className("form")} \\
+By.cssSelector & CSS path & Complex & \texttt{input.form} \\
+By.xpath & XML path & Dynamic & \texttt{//input[@id='username']} \\
+\bottomrule
+\end{tabular}
+\caption{Common Selenium Locators}
+\end{table}
+
+\subsection{Finding Multiple Elements}
+\begin{lstlisting}[language=Java]
+List<WebElement> links = driver.findElements(By.tagName("a"));
+System.out.println("Total links: " + links.size());
+\end{lstlisting}
+
+\subsection{Example: Login Form}
+\begin{lstlisting}[language=Java]
+WebElement emailField = driver.findElement(By.id("email"));
+emailField.sendKeys("test@gmail.com");
+WebElement loginBtn = driver.findElement(By.id("loginBtn"));
+loginBtn.click();
+\end{lstlisting}
+
+\section{Interacting with Elements}
+
+\begin{itemize}
+    \item \texttt{sendKeys("text")}: Type.
+    \item \texttt{click()}: Click.
+    \item \texttt{getText()}: Get text.
+    \item \texttt{isDisplayed()}: Check visibility.
+\end{itemize}
+
+Example:
+\begin{lstlisting}[language=Java]
+WebElement nameField = driver.findElement(By.name("fullname"));
+nameField.clear();
+nameField.sendKeys("John Doe");
+driver.findElement(By.id("submit")).click();
+\end{lstlisting}
+
+\section{Waits (Handling Dynamic Pages)}
+
+\subsection{Implicit Wait}
+\begin{lstlisting}[language=Java]
+driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+\end{lstlisting}
+
+\subsection{Explicit Wait}
+\begin{lstlisting}[language=Java]
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+WebElement elem = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("myButton")));
+elem.click();
+\end{lstlisting}
+
+\subsection{Fluent Wait}
+\begin{lstlisting}[language=Java]
+import org.openqa.selenium.support.ui.FluentWait;
+
+Wait<WebDriver> fluentWait = new FluentWait<WebDriver>(driver)
+    .withTimeout(Duration.ofSeconds(10))
+    .pollingEvery(Duration.ofSeconds(2))
+    .ignoring(NoSuchElementException.class);
+\end{lstlisting}
+
+\section{Handling Alerts, Frames, Windows}
+
+\subsection{Alerts}
+\begin{lstlisting}[language=Java]
+Alert alert = driver.switchTo().alert();
+alert.accept();
+\end{lstlisting}
+
+\subsection{Frames}
+\begin{lstlisting}[language=Java]
+driver.switchTo().frame("player");
+driver.switchTo().defaultContent();
+\end{lstlisting}
+
+\subsection{Windows}
+\begin{lstlisting}[language=Java]
+String parent = driver.getWindowHandle();
+Set<String> handles = driver.getWindowHandles();
+for(String win : handles) {
+    if(!win.equals(parent)) driver.switchTo().window(win);
+}
+\end{lstlisting}
+
+\section{Mouse and Keyboard Actions}
+
+\subsection{Mouse}
+\begin{lstlisting}[language=Java]
+import org.openqa.selenium.interactions.Actions;
+
+Actions actions = new Actions(driver);
+actions.moveToElement(menu).perform();
+\end{lstlisting}
+
+\subsection{Keyboard}
+\begin{lstlisting}[language=Java]
+actions.sendKeys(Keys.ENTER).perform();
+\end{lstlisting}
+
+\section{Taking Screenshots}
+
+\begin{lstlisting}[language=Java]
+import org.apache.commons.io.FileUtils;
+
+File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+FileUtils.copyFile(screenshot, new File("error.png"));
+\end{lstlisting}
+
+\section{Data Handling}
+
+\subsection{Properties File}
+\begin{lstlisting}[language=Java]
+Properties prop = new Properties();
+prop.load(new FileInputStream("config.properties"));
+String url = prop.getProperty("url");
+driver.get(url);
+\end{lstlisting}
+
+\subsection{Excel (Apache POI)}
+\begin{lstlisting}[language=Java]
+import org.apache.poi.ss.usermodel.*;
+
+FileInputStream fis = new FileInputStream("data.xlsx");
+Workbook wb = WorkbookFactory.create(fis);
+String username = wb.getSheet("Sheet1").getRow(0).getCell(0).getStringCellValue();
+\end{lstlisting}
+
+\section{Page Object Model (POM)}
+
+\subsection{Base Class}
+\begin{lstlisting}[language=Java]
+public class BasePage {
+    protected WebDriver driver;
+    protected WebDriverWait wait;
+
+    public BasePage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+}
+\end{lstlisting}
+
+\subsection{Page Class}
+\begin{lstlisting}[language=Java]
+import org.openqa.selenium.support.FindBy;
+
+public class LoginPage extends BasePage {
+    @FindBy(id = "username") private WebElement userField;
+    @FindBy(id = "password") private WebElement passField;
+
+    public LoginPage(WebDriver driver) {
+        super(driver);
+        PageFactory.initElements(driver, this);
+    }
+
+    public void login(String user, String pass) {
+        userField.sendKeys(user);
+        passField.sendKeys(pass);
+    }
+}
+\end{lstlisting}
+
+\section{TestNG Framework}
+
+\subsection{Setup}
+Add to \texttt{pom.xml}:
+\begin{lstlisting}[language=XML]
+<dependency>
+    <groupId>org.testng</groupId>
+    <artifactId>testng</artifactId>
+    <version>7.8.0</version>
+</dependency>
+\end{lstlisting}
+
+\subsection{Test Example}
+\begin{lstlisting}[language=Java]
+import org.testng.annotations.*;
+
+public class GoogleTest {
+    WebDriver driver;
+
+    @BeforeMethod
+    public void setup() {
+        driver = new ChromeDriver();
+    }
+
+    @Test
+    public void searchTest() {
+        driver.get("https://google.com");
+        driver.findElement(By.name("q")).sendKeys("Selenium");
+        Assert.assertTrue(driver.getTitle().contains("Selenium"));
+    }
+
+    @AfterMethod
+    public void teardown() {
+        driver.quit();
+    }
+}
+\end{lstlisting}
+
+\subsection{Data Provider}
+\begin{lstlisting}[language=Java]
+@DataProvider(name = "loginData")
+public Object[][] getData() {
+    return new Object[][] {
+        {"user1", "pass1"},
+        {"user2", "pass2"}
+    };
+}
+
+@Test(dataProvider = "loginData")
+public void loginTest(String user, String pass) {
+    System.out.println("Testing with " + user);
+}
+\end{lstlisting}
+
+\section{Final Tips}
+
+\begin{itemize}
+    \item \textbf{Practice}: Automate sites like Facebook login.
+    \item \textbf{Errors}: Check locators, waits, PATH.
+    \item \textbf{Next}: Cucumber, Jenkins, Appium.
+\end{itemize}
+
+\end{document}
